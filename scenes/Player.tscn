@@ -2,8 +2,6 @@
 
 [ext_resource type="Script" uid="uid://bmf8te4v1nqsn" path="res://scripts/Player.gd" id="1"]
 [ext_resource type="Script" uid="uid://d0k1xxkcmjghq" path="res://scripts/PlayerCamera.gd" id="2"]
-[ext_resource type="PackedScene" uid="uid://ba73lkre5ot8k" path="res://scenes/superhero_male_full_body.tscn" id="3"]
-[ext_resource type="Script" path="res://scripts/CharacterAnimator.gd" id="4"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -22,6 +20,9 @@ properties/2/replication_mode = 1
 properties/3/path = NodePath(".:au_sol_reseau")
 properties/3/spawn = true
 properties/3/replication_mode = 1
+properties/4/path = NodePath(".:tenue_reseau")
+properties/4/spawn = true
+properties/4/replication_mode = 1
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -33,9 +34,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.887956, 0)
 shape = SubResource("CapsuleShape3D_1")
 
 [node name="MeshPivot" type="Node3D" parent="."]
-
-[node name="Modele" parent="MeshPivot" instance=ExtResource("3")]
-script = ExtResource("4")
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)

@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" uid="uid://ba73lkre5ot8k" path="res://scenes/superhero_male_full_body.tscn" id="1"]
+[ext_resource type="Script" path="res://scripts/CharacterAnimator.gd" id="2"]
+
+[node name="CharacterMale" instance=ExtResource("1")]
+script = ExtResource("2")

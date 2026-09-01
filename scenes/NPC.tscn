@@ -1,8 +1,6 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/npc.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://ba73lkre5ot8k" path="res://scenes/superhero_male_full_body.tscn" id="2"]
-[ext_resource type="Script" path="res://scripts/CharacterAnimator.gd" id="3"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -18,6 +16,9 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath(".:vitesse_reseau")
 properties/2/spawn = true
 properties/2/replication_mode = 1
+properties/3/path = NodePath(".:tenue_reseau")
+properties/3/spawn = true
+properties/3/replication_mode = 1
 
 [node name="NPC" type="CharacterBody3D"]
 collision_layer = 2
@@ -29,9 +30,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.887956, 0)
 shape = SubResource("CapsuleShape3D_1")
 
 [node name="MeshPivot" type="Node3D" parent="."]
-
-[node name="Modele" parent="MeshPivot" instance=ExtResource("2")]
-script = ExtResource("3")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_1")

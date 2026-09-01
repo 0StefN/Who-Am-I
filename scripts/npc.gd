@@ -13,7 +13,22 @@ extends CharacterBody3D
 ## exactement pareil. Ne jamais redéfinir ces valeurs ici.
 
 @onready var mesh_pivot: Node3D = $MeshPivot
-@onready var modele: Node3D = $MeshPivot/Modele
+
+## Construit à l'exécution à partir de tenue_reseau (voir Player.gd pour
+## le détail du raisonnement).
+var modele: Node3D = null
+
+## Dernière tenue effectivement construite, pour éviter de tout refaire
+## quand la même valeur est réappliquée.
+var _tenue_construite: PackedInt32Array = PackedInt32Array()
+
+## Tenue tirée par le SERVEUR et répliquée. Chaque client reconstruit la
+## même apparence : un PNJ doit être identique sur tous les écrans, sinon
+## un caché pourrait sembler habillé différemment selon le joueur.
+var tenue_reseau: PackedInt32Array = PackedInt32Array():
+	set(valeur):
+		tenue_reseau = valeur
+		_reconstruire_apparence()
 
 var current_state: NPCState = null
 
@@ -30,8 +45,23 @@ var vitesse_reseau := 0.0
 
 func _ready() -> void:
 	add_to_group("npc")
+	_reconstruire_apparence()
 	set_multiplayer_authority(1)  # Toujours contrôlé par le serveur.
 	change_state(IdleState.new())
+
+
+func _reconstruire_apparence() -> void:
+	if not is_inside_tree() or mesh_pivot == null:
+		return
+	if tenue_reseau.size() < WardrobeCatalog.TAILLE_TENUE:
+		return
+	# Reconstruire coûte cher et redémarre les animations en cours. Le
+	# setter et _ready peuvent tous deux déclencher l'appel : on ne
+	# reconstruit que si la tenue a réellement changé.
+	if tenue_reseau == _tenue_construite and is_instance_valid(modele):
+		return
+	_tenue_construite = tenue_reseau.duplicate()
+	modele = Wardrobe.construire(mesh_pivot, tenue_reseau)
 
 
 ## Point d'extension principal : change de comportement à tout moment,
@@ -47,7 +77,7 @@ func change_state(new_state: NPCState) -> void:
 func _process(_delta: float) -> void:
 	# Tourne sur tous les clients : chacun choisit l'animation localement
 	# à partir de la vitesse répliquée par le serveur.
-	if modele:
+	if is_instance_valid(modele):
 		modele.mettre_a_jour(vitesse_reseau, true)
 
 

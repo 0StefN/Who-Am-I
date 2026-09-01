@@ -29,6 +29,10 @@ var _hud_debug_printed := false
 # Compteur utilisé uniquement côté serveur pour répartir les spawns.
 var _spawn_index := 0
 
+## Générateur de tenues, côté serveur uniquement. Centraliser le tirage
+## ici garantit que tous les clients voient les mêmes apparences.
+var _rng := RandomNumberGenerator.new()
+
 
 func _ready() -> void:
 	host_button.pressed.connect(_on_host_pressed)
@@ -64,7 +68,7 @@ func _next_spawn_position() -> Vector3:
 func _on_host_pressed() -> void:
 	Network.host_game()
 	# Le serveur (id 1) se spawn lui-même directement.
-	spawn_player.rpc(1, _next_spawn_position())
+	spawn_player.rpc(1, _next_spawn_position(), WardrobeCatalog.tirer_tenue(_rng))
 	_setup_npcs()
 	ui_state = UIState.LOBBY
 	_refresh_ui()
@@ -78,6 +82,7 @@ func _setup_npcs() -> void:
 	if not multiplayer.is_server():
 		return
 	for npc in $NPCs.get_children():
+		npc.tenue_reseau = WardrobeCatalog.tirer_tenue(_rng)
 		var base: Vector3 = npc.position
 		var patrol := PatrolState.new([
 			base + Vector3(6, 0, 0),
@@ -167,11 +172,11 @@ func _on_peer_connected(id: int) -> void:
 		return
 	# Dit à tout le monde (y compris le nouveau) de spawn ce joueur,
 	# à une position libre calculée côté serveur.
-	spawn_player.rpc(id, _next_spawn_position())
+	spawn_player.rpc(id, _next_spawn_position(), WardrobeCatalog.tirer_tenue(_rng))
 	# Dit spécifiquement au nouveau joueur de spawn tous ceux déjà présents,
 	# à leur position ACTUELLE (pas une nouvelle position calculée).
 	for existing_player in players_container.get_children():
-		spawn_player.rpc_id(id, int(existing_player.name), existing_player.position)
+		spawn_player.rpc_id(id, int(existing_player.name), existing_player.position, existing_player.tenue_reseau)
 
 
 func _on_peer_disconnected(id: int) -> void:
@@ -181,13 +186,15 @@ func _on_peer_disconnected(id: int) -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func spawn_player(id: int, spawn_position: Vector3) -> void:
+func spawn_player(id: int, spawn_position: Vector3,
+		tenue: PackedInt32Array) -> void:
 	if players_container.has_node(str(id)):
 		return  # Idempotent : évite les doublons si l'appel arrive deux fois.
 	var player := player_scene.instantiate()
 	player.name = str(id)
 	player.set_multiplayer_authority(id)
 	player.position = spawn_position
+	player.tenue_reseau = tenue
 	players_container.add_child(player, true)
 
 

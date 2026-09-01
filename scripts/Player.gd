@@ -17,11 +17,30 @@ const JUMP_VELOCITY := 4.5
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 @onready var mesh_pivot: Node3D = $MeshPivot
-@onready var modele: Node3D = $MeshPivot/Modele
+
+## Construit à l'exécution à partir de tenue_reseau, pas figé dans la
+## scène : c'est ce qui permet d'avoir des personnages masculins ET
+## féminins avec des vêtements différents.
+var modele: Node3D = null
+
+## Dernière tenue effectivement construite, pour éviter de tout refaire
+## quand la même valeur est réappliquée.
+var _tenue_construite: PackedInt32Array = PackedInt32Array()
 
 var role: int = RoleTypes.Role.NONE
 var is_spectating := false
 var spectate_target: Node3D = null
+
+## Tenue répliquée par le serveur. Le setter reconstruit l'apparence dès
+## réception : c'est indispensable pour les joueurs distants, qui
+## découvrent la tenue après la création du nœud.
+## Le serveur est SEUL à décider des tenues — si chaque client tirait au
+## hasard dans son coin, un même joueur apparaîtrait habillé différemment
+## d'un écran à l'autre, ce qui ruinerait le jeu.
+var tenue_reseau: PackedInt32Array = PackedInt32Array():
+	set(valeur):
+		tenue_reseau = valeur
+		_reconstruire_apparence()
 
 # Répliquées par le MultiplayerSynchronizer : on synchronise la VITESSE,
 # pas le nom de l'animation. Chaque client en déduit localement quoi jouer,
@@ -34,6 +53,32 @@ func _ready() -> void:
 	add_to_group("player")
 	GameManager.role_assigned.connect(_on_role_assigned)
 	GameManager.seeker_died.connect(_on_seeker_died)
+	# La tenue peut être arrivée avant que le nœud soit dans l'arbre.
+	_reconstruire_apparence()
+
+
+func _reconstruire_apparence() -> void:
+	if not is_inside_tree() or mesh_pivot == null:
+		return
+	if tenue_reseau.size() < WardrobeCatalog.TAILLE_TENUE:
+		return
+	# Reconstruire coûte cher et redémarre les animations en cours. Le
+	# setter et _ready peuvent tous deux déclencher l'appel : on ne
+	# reconstruit que si la tenue a réellement changé.
+	if tenue_reseau == _tenue_construite and is_instance_valid(modele):
+		return
+	_tenue_construite = tenue_reseau.duplicate()
+	modele = Wardrobe.construire(mesh_pivot, tenue_reseau)
+	_appliquer_visibilite_locale()
+
+
+## Le chercheur est en vue FPS : la caméra est dans la tête du modèle, on
+## verrait l'intérieur du maillage. On le masque donc pour son seul
+## porteur — les autres continuent de le voir normalement, puisque cette
+## visibilité n'est changée que localement.
+func _appliquer_visibilite_locale() -> void:
+	if is_instance_valid(modele) and is_multiplayer_authority():
+		modele.definir_visibilite_locale(role != RoleTypes.Role.SEEKER)
 
 
 func _on_role_assigned(id: int, assigned_role: int) -> void:
@@ -41,12 +86,12 @@ func _on_role_assigned(id: int, assigned_role: int) -> void:
 		return
 	role = assigned_role
 
-	# En vue FPS, la caméra est dans la tête du modèle : on verrait
-	# l'intérieur du maillage. On le masque donc pour son seul porteur.
-	# Les autres joueurs continuent de le voir normalement, puisque cette
-	# visibilité n'est modifiée que localement.
-	if is_multiplayer_authority() and modele:
-		modele.definir_visibilite_locale(role != RoleTypes.Role.SEEKER)
+	# Le chercheur reçoit une teinte réservée, pour être identifiable au
+	# premier coup d'œil. Seul le serveur peut décider de ce changement.
+	if multiplayer.is_server() and role == RoleTypes.Role.SEEKER:
+		tenue_reseau = WardrobeCatalog.en_chercheur(tenue_reseau)
+
+	_appliquer_visibilite_locale()
 
 
 func _on_seeker_died(id: int) -> void:
@@ -111,7 +156,7 @@ func _process(_delta: float) -> void:
 	# contrôlés à distance : c'est ce qui les fait bouger correctement à
 	# l'écran des autres. Le joueur local calcule sa vitesse réelle, les
 	# autres utilisent celle reçue par le MultiplayerSynchronizer.
-	if modele:
+	if is_instance_valid(modele):
 		if is_multiplayer_authority():
 			vitesse_reseau = Vector2(velocity.x, velocity.z).length()
 			au_sol_reseau = is_on_floor()
