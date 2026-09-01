@@ -22,13 +22,13 @@ const MODELES := {
 ## ⚠️ Pas d'entrée vide ici : le tirage étant uniforme, une option ""
 ## produirait des personnages torse nu, ce qui n'a aucun sens dans une
 ## foule où tout le monde doit pouvoir se fondre.
-## Les femmes n'ont pas encore de vêtements dédiés : leur modèle porte
-## déjà une tenue intégrée, donc la liste vide est correcte pour elles.
 const HAUTS := {
 	Genre.HOMME: [
 		"res://Models & Animations/Clothes/Male/Tshirt_Male.glb",
 	],
-	Genre.FEMME: [],
+	Genre.FEMME: [
+		"res://Models & Animations/Clothes/Female/Tshirt_Female.glb",
+	],
 }
 
 ## Bas, par genre. Même remarque que pour les hauts.
@@ -36,7 +36,9 @@ const BAS := {
 	Genre.HOMME: [
 		"res://Models & Animations/Clothes/Male/Pants_Male.glb",
 	],
-	Genre.FEMME: [],
+	Genre.FEMME: [
+		"res://Models & Animations/Clothes/Female/Pants_Female.glb",
+	],
 }
 
 ## Chaussures, par genre. Vides pour l'instant : les modèles ont des
