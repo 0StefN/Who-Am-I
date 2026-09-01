@@ -63,7 +63,10 @@ static func construire(parent: Node3D, tenue: PackedInt32Array) -> Node3D:
 	# teintés — ils ont leurs propres textures, qu'une surcharge de
 	# matériau écraserait au profit d'un aplat de couleur.
 	for chemin in WardrobeCatalog.chemins_accessoires_tete(tenue):
-		attacher_rigide(modele, _charger(chemin), WardrobeCatalog.OS_TETE)
+		var accessoire := attacher_rigide(
+			modele, _charger(chemin), WardrobeCatalog.OS_TETE)
+		if accessoire:
+			_dilater(accessoire, DILATATION_ACCESSOIRES)
 
 	return modele
 
@@ -153,6 +156,12 @@ static func attacher(personnage: Node3D, scene_vetement: PackedScene) -> MeshIns
 ## diminue-la si le vêtement paraît bouffant.
 const DILATATION := 0.006
 
+## Dilatation appliquée aux accessoires rigides (cheveux, barbes).
+## Plus faible que pour les vêtements : une coiffure trop dilatée prend
+## un aspect de casque. Sert à empêcher le crâne de transparaître entre
+## les mèches.
+const DILATATION_ACCESSOIRES := 0.003
+
 
 ## Applique une teinte au vêtement via une surcharge de matériau.
 ## On passe par material_override plutôt que par le matériau de la
@@ -165,3 +174,33 @@ static func _teinter(maillage: MeshInstance3D, couleur: Color) -> void:
 	materiau.grow = true
 	materiau.grow_amount = DILATATION
 	maillage.material_override = materiau
+
+
+## Dilate un maillage EN CONSERVANT ses matériaux d'origine.
+##
+## Contrairement aux vêtements, on ne peut pas écraser le matériau des
+## cheveux par une couleur unie : ils ont leurs propres textures. On
+## duplique donc le matériau existant — le duplicata évite que le
+## réglage se propage à toutes les instances de la même coiffure — et on
+## y active `grow`, qui dilate le maillage au rendu sans toucher à la
+## géométrie.
+static func _dilater(racine: Node, montant: float) -> void:
+	for maillage in _tous_les_maillages(racine):
+		for i in range(maillage.get_surface_override_material_count()):
+			var source := maillage.get_active_material(i)
+			if source == null:
+				continue
+			var materiau := source.duplicate()
+			if materiau is BaseMaterial3D:
+				materiau.grow = true
+				materiau.grow_amount = montant
+				maillage.set_surface_override_material(i, materiau)
+
+
+static func _tous_les_maillages(racine: Node) -> Array[MeshInstance3D]:
+	var resultat: Array[MeshInstance3D] = []
+	if racine is MeshInstance3D:
+		resultat.append(racine)
+	for enfant in racine.get_children():
+		resultat.append_array(_tous_les_maillages(enfant))
+	return resultat

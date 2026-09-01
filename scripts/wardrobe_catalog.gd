@@ -60,16 +60,18 @@ const CHAUSSURES := {
 ## Os sur lequel les accessoires de tête sont accrochés.
 const OS_TETE := "Head"
 
+## Coiffures, séparées par genre. Aucune pièce n'est partagée entre les
+## deux : les modèles n'ayant pas la même taille (1,81 m contre 1,77 m),
+## une coiffure modelée sur l'un tombe de travers sur l'autre.
 const CHEVEUX := {
 	Genre.HOMME: [
-		"res://Models & Animations/Hairs/Hair_Buzzed.gltf",
-		"res://Models & Animations/Hairs/Hair_SimpleParted.gltf",
-		"res://Models & Animations/Hairs/Hair_Long.gltf",
+		"res://Models & Animations/Hairs/Male/Hair_Buzzed.gltf",
+		"res://Models & Animations/Hairs/Male/Hair_SimpleParted.gltf",
 	],
 	Genre.FEMME: [
-		"res://Models & Animations/Hairs/Hair_BuzzedFemale.gltf",
-		"res://Models & Animations/Hairs/Hair_Buns.gltf",
-		"res://Models & Animations/Hairs/Hair_Long.gltf",
+		"res://Models & Animations/Hairs/Female/Hair_BuzzedFemale.gltf",
+		"res://Models & Animations/Hairs/Female/Hair_Long.gltf",
+		"res://Models & Animations/Hairs/Female/Hair_Buns.gltf",
 	],
 }
 
@@ -80,14 +82,18 @@ const BARBES := {
 	Genre.HOMME: [
 		"",
 		"",
-		"res://Models & Animations/Hairs/Hair_Beard.gltf",
+		"res://Models & Animations/Hairs/Male/Hair_Beard.gltf",
 	],
 	Genre.FEMME: [""],
 }
 
 const SOURCILS := {
-	Genre.HOMME: ["res://Models & Animations/Hairs/Eyebrows_Regular.gltf"],
-	Genre.FEMME: ["res://Models & Animations/Hairs/Eyebrows_Female.gltf"],
+	Genre.HOMME: [
+		"res://Models & Animations/Hairs/Eyebrows/Eyebrows_Regular.gltf",
+	],
+	Genre.FEMME: [
+		"res://Models & Animations/Hairs/Eyebrows/Eyebrows_Female.gltf",
+	],
 }
 
 ## Teintes appliquées aux vêtements. C'est le meilleur rapport

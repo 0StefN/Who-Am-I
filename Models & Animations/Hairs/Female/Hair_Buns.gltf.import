@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ddml3yliw5oq7"
-path="res://.godot/imported/Hair_Buns.gltf-8d62dfbc4e396bff1922949614e3f23c.scn"
+uid="uid://cjmrr10e5jryd"
+path="res://.godot/imported/Hair_Buns.gltf-fb060596355fedf827e5cd6353a62f36.scn"
 
 [deps]
 
-source_file="res://Models & Animations/Hairs/Male/Hair_Buns.gltf"
-dest_files=["res://.godot/imported/Hair_Buns.gltf-8d62dfbc4e396bff1922949614e3f23c.scn"]
+source_file="res://Models & Animations/Hairs/Female/Hair_Buns.gltf"
+dest_files=["res://.godot/imported/Hair_Buns.gltf-fb060596355fedf827e5cd6353a62f36.scn"]
 
 [params]
 
