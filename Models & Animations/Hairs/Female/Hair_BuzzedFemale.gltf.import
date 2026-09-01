@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dgcfkqov3y8ue"
-path="res://.godot/imported/Hair_BuzzedFemale.gltf-052bb7d2d9e553d5c61317deb699f71c.scn"
+path="res://.godot/imported/Hair_BuzzedFemale.gltf-dd4864c10abccd06cb75b62b7d596d3c.scn"
 
 [deps]
 
-source_file="res://Models & Animations/Hairs/Hair_BuzzedFemale.gltf"
-dest_files=["res://.godot/imported/Hair_BuzzedFemale.gltf-052bb7d2d9e553d5c61317deb699f71c.scn"]
+source_file="res://Models & Animations/Hairs/Female/Hair_BuzzedFemale.gltf"
+dest_files=["res://.godot/imported/Hair_BuzzedFemale.gltf-dd4864c10abccd06cb75b62b7d596d3c.scn"]
 
 [params]
 

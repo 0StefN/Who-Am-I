@@ -59,7 +59,48 @@ static func construire(parent: Node3D, tenue: PackedInt32Array) -> Node3D:
 		if maillage:
 			_teinter(maillage, couleur)
 
+	# Accessoires rigides : cheveux, barbe, sourcils. Ils ne sont PAS
+	# teintés — ils ont leurs propres textures, qu'une surcharge de
+	# matériau écraserait au profit d'un aplat de couleur.
+	for chemin in WardrobeCatalog.chemins_accessoires_tete(tenue):
+		attacher_rigide(modele, _charger(chemin), WardrobeCatalog.OS_TETE)
+
 	return modele
+
+
+## Monte un accessoire rigide (cheveux, chapeau, lunettes...) sur un os.
+##
+## Contrairement à un vêtement, un accessoire rigide n'a ni squelette ni
+## vertex groups : il ne se déforme pas, il suit un os en bloc. Un
+## BoneAttachment3D suffit, et évite tout calcul de déformation.
+static func attacher_rigide(personnage: Node3D, scene_accessoire: PackedScene,
+		nom_os: String) -> Node3D:
+	if scene_accessoire == null:
+		return null
+
+	var squelette := _trouver(personnage, Skeleton3D) as Skeleton3D
+	if squelette == null:
+		push_error("Wardrobe : aucun Skeleton3D trouvé sur %s" % personnage.name)
+		return null
+
+	if squelette.find_bone(nom_os) == -1:
+		push_error("Wardrobe : os '%s' introuvable dans le squelette" % nom_os)
+		return null
+
+	var attache := BoneAttachment3D.new()
+	attache.name = "Attache_%s" % nom_os
+	squelette.add_child(attache)
+	attache.bone_name = nom_os
+
+	var instance := scene_accessoire.instantiate() as Node3D
+	attache.add_child(instance)
+	# L'accessoire a été modelé dans l'espace du personnage, pas dans
+	# celui de l'os : on annule la transformation de l'os pour le
+	# replacer là où il a été conçu.
+	instance.transform = squelette.get_bone_global_pose(
+		squelette.find_bone(nom_os)).affine_inverse()
+
+	return instance
 
 
 ## Attache un vêtement au squelette d'un personnage.

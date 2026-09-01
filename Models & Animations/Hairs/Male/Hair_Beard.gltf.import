@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b8so635e4lv08"
-path="res://.godot/imported/Hair_Buzzed.gltf-d74861905ec674b956ce942c25ec9611.scn"
+uid="uid://dj2x2p2c8mshk"
+path="res://.godot/imported/Hair_Beard.gltf-b1358a12273e72f2f27a3a229527cfee.scn"
 
 [deps]
 
-source_file="res://Models & Animations/Hairs/Hair_Buzzed.gltf"
-dest_files=["res://.godot/imported/Hair_Buzzed.gltf-d74861905ec674b956ce942c25ec9611.scn"]
+source_file="res://Models & Animations/Hairs/Male/Hair_Beard.gltf"
+dest_files=["res://.godot/imported/Hair_Beard.gltf-b1358a12273e72f2f27a3a229527cfee.scn"]
 
 [params]
 

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dqqm1o56egtqv"
-path="res://.godot/imported/Eyebrows_Female.gltf-9e007a924a8ee25a90085a7c9c4ac7f3.scn"
+uid="uid://cgacrwg5kdtrl"
+path="res://.godot/imported/Eyebrows_Regular.gltf-2720468b9206ed48203e5035d443176d.scn"
 
 [deps]
 
-source_file="res://Models & Animations/Hairs/Eyebrows_Female.gltf"
-dest_files=["res://.godot/imported/Eyebrows_Female.gltf-9e007a924a8ee25a90085a7c9c4ac7f3.scn"]
+source_file="res://Models & Animations/Hairs/Eyebrows/Eyebrows_Regular.gltf"
+dest_files=["res://.godot/imported/Eyebrows_Regular.gltf-2720468b9206ed48203e5035d443176d.scn"]
 
 [params]
 

@@ -48,6 +48,48 @@ const CHAUSSURES := {
 	Genre.FEMME: [],
 }
 
+## ---------------------------------------------------------------------
+## ACCESSOIRES RIGIDES
+##
+## Cheveux, barbes, sourcils : ces meshes n'ont NI squelette NI vertex
+## groups. Ils ne se déforment pas, ils suivent un os en bloc — d'où
+## l'usage d'un BoneAttachment3D plutôt qu'un greffage sur le squelette.
+## C'est aussi plus léger : aucun calcul de déformation par sommet.
+## ---------------------------------------------------------------------
+
+## Os sur lequel les accessoires de tête sont accrochés.
+const OS_TETE := "Head"
+
+const CHEVEUX := {
+	Genre.HOMME: [
+		"res://Models & Animations/Hairs/Hair_Buzzed.gltf",
+		"res://Models & Animations/Hairs/Hair_SimpleParted.gltf",
+		"res://Models & Animations/Hairs/Hair_Long.gltf",
+	],
+	Genre.FEMME: [
+		"res://Models & Animations/Hairs/Hair_BuzzedFemale.gltf",
+		"res://Models & Animations/Hairs/Hair_Buns.gltf",
+		"res://Models & Animations/Hairs/Hair_Long.gltf",
+	],
+}
+
+## Pilosité faciale. L'entrée vide est ICI légitime, contrairement aux
+## vêtements : ne pas porter de barbe est une apparence parfaitement
+## normale, et elle doit rester majoritaire.
+const BARBES := {
+	Genre.HOMME: [
+		"",
+		"",
+		"res://Models & Animations/Hairs/Hair_Beard.gltf",
+	],
+	Genre.FEMME: [""],
+}
+
+const SOURCILS := {
+	Genre.HOMME: ["res://Models & Animations/Hairs/Eyebrows_Regular.gltf"],
+	Genre.FEMME: ["res://Models & Animations/Hairs/Eyebrows_Female.gltf"],
+}
+
 ## Teintes appliquées aux vêtements. C'est le meilleur rapport
 ## variété/effort : 3 hauts x 3 bas x 8 teintes = des centaines
 ## d'apparences perçues à partir d'une poignée de meshes.
@@ -70,8 +112,11 @@ const TEINTE_CHERCHEUR := Color(0.95, 0.45, 0.05)  # orange vif
 ## Ordre des valeurs dans une tenue. Une tenue est un PackedInt32Array :
 ## compact à répliquer sur le réseau, et reconstruit à l'identique par
 ## chaque client.
-enum Champ { GENRE, HAUT, BAS, CHAUSSURES, TEINTE, CHERCHEUR }
-const TAILLE_TENUE := 6
+enum Champ {
+	GENRE, HAUT, BAS, CHAUSSURES, TEINTE, CHERCHEUR,
+	CHEVEUX, BARBE, SOURCILS,
+}
+const TAILLE_TENUE := 9
 
 
 static func _liste(dictionnaire: Dictionary, genre: int) -> Array:
@@ -98,6 +143,9 @@ static func tirer_tenue(rng: RandomNumberGenerator) -> PackedInt32Array:
 	tenue[Champ.CHAUSSURES] = _tirer_index(_liste(CHAUSSURES, genre), rng)
 	tenue[Champ.TEINTE] = rng.randi_range(0, TEINTES.size() - 1)
 	tenue[Champ.CHERCHEUR] = 0
+	tenue[Champ.CHEVEUX] = _tirer_index(_liste(CHEVEUX, genre), rng)
+	tenue[Champ.BARBE] = _tirer_index(_liste(BARBES, genre), rng)
+	tenue[Champ.SOURCILS] = _tirer_index(_liste(SOURCILS, genre), rng)
 	return tenue
 
 
@@ -127,6 +175,22 @@ static func chemins_vetements(tenue: PackedInt32Array) -> Array[String]:
 	var genre: int = tenue[Champ.GENRE]
 	for paire in [[HAUTS, Champ.HAUT], [BAS, Champ.BAS],
 			[CHAUSSURES, Champ.CHAUSSURES]]:
+		var liste: Array = _liste(paire[0], genre)
+		var index: int = tenue[paire[1]]
+		if index >= 0 and index < liste.size() and liste[index] != "":
+			resultat.append(liste[index])
+	return resultat
+
+
+## Chemins des accessoires rigides (cheveux, barbe, sourcils), à monter
+## sur un BoneAttachment3D plutôt qu'à greffer sur le squelette.
+static func chemins_accessoires_tete(tenue: PackedInt32Array) -> Array[String]:
+	var resultat: Array[String] = []
+	if tenue.size() < TAILLE_TENUE:
+		return resultat
+	var genre: int = tenue[Champ.GENRE]
+	for paire in [[CHEVEUX, Champ.CHEVEUX], [BARBES, Champ.BARBE],
+			[SOURCILS, Champ.SOURCILS]]:
 		var liste: Array = _liste(paire[0], genre)
 		var index: int = tenue[paire[1]]
 		if index >= 0 and index < liste.size() and liste[index] != "":
